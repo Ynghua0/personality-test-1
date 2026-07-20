@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>感性-理性双元人格综合检测 | 基于功能重心转移模型</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', 'Noto Sans', 'Helvetica Neue', system-ui, sans-serif;
+      background: #f5f7fa;
+      color: #1e293b;
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 2rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+      padding: 2.5rem;
+    }
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #0f172a;
+      text-align: center;
+    }
+    .subtitle {
+      text-align: center;
+      color: #475569;
+      margin-bottom: 2rem;
+      font-size: 1rem;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 1.5rem;
+    }
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 2rem 0 1rem;
+      color: #334155;
+      border-left: 4px solid #6366f1;
+      padding-left: 1rem;
+    }
+    .intro {
+      background: #f8fafc;
+      border-radius: 1rem;
+      padding: 1.2rem;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+      color: #334155;
+    }
+    .question-block {
+      margin-bottom: 2.5rem;
+    }
+    .question-item {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 1rem;
+      padding: 1.2rem;
+      margin-bottom: 1rem;
+      transition: 0.2s;
+    }
+    .question-item:hover {
+      border-color: #a5b4fc;
+      box-shadow: 0 4px 12px rgba(99,102,241,0.08);
+    }
+    .question-text {
+      font-weight: 500;
+      margin-bottom: 0.8rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+    .q-num {
+      color: #6366f1;
+      font-weight: 600;
+      min-width: 2rem;
+    }
+    .options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+      align-items: center;
+    }
+    .options label {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #475569;
+      background: #f1f5f9;
+      padding: 0.3rem 0.8rem;
+      border-radius: 2rem;
+      transition: 0.2s;
+    }
+    .options label:hover {
+      background: #e0e7ff;
+    }
+    .options input[type="radio"] {
+      accent-color: #6366f1;
+      width: 1rem;
+      height: 1rem;
+      margin: 0;
+    }
+    .section-desc {
+      font-style: italic;
+      color: #64748b;
+      background: #f1f5f9;
+      padding: 1rem;
+      border-radius: 0.8rem;
+      margin-bottom: 1.5rem;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      background: #6366f1;
+      color: white;
+      border: none;
+      padding: 1rem;
+      font-size: 1.2rem;
+      font-weight: 600;
+      border-radius: 3rem;
+      cursor: pointer;
+      margin: 2rem 0 1rem;
+      transition: 0.2s;
+      letter-spacing: 0.5px;
+    }
+    .btn:hover {
+      background: #4f46e5;
+      box-shadow: 0 8px 18px rgba(99,102,241,0.3);
+    }
+    .result-card {
+      background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+      border-radius: 1.5rem;
+      padding: 2rem;
+      margin: 2rem 0;
+      text-align: center;
+    }
+    .result-type {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #312e81;
+      margin: 0.5rem 0;
+      letter-spacing: 2px;
+    }
+    .balance-meter {
+      background: #cbd5e1;
+      height: 12px;
+      border-radius: 10px;
+      margin: 1.5rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .balance-fill {
+      height: 100%;
+      background: #6366f1;
+      border-radius: 10px;
+      width: 50%;
+      transition: width 0.4s;
+    }
+    .axis-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: #475569;
+    }
+    .note {
+      font-size: 0.9rem;
+      color: #475569;
+      margin-top: 1rem;
+    }
+    .error {
+      color: #b91c1c;
+      text-align: center;
+      font-weight: 500;
+    }
+    .footer-note {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: 2rem;
+    }
+    hr {
+      border: 0.5px solid #e2e8f0;
+      margin: 2rem 0;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>🧠 感性-理性双元人格检测</h1>
+  <div class="subtitle">基于“功能重心转移”理论的综合心理类型工具</div>
+
+  <div class="intro">
+    <strong>理论背景：</strong>本测试源于一种新的动态人格模型——每一“感性”人格（F型）都拥有一个与它共享全部心理功能、但重心完全相反的“理性镜像”（T型）。切换并非变成他人，而是同一心灵内功能优先级的自然流动。<br>
+    测试分为两部分：<strong>Part A 感性模式</strong>（放松状态下的你）与 <strong>Part B 理性模式</strong>（应对挑战时的你）。请根据第一反应作答。
+  </div>
+
+  <div id="test-form">
+    <!-- Part A -->
+    <h2>🌿 第一部分：感性模式（放松、安全时）</h2>
+    <div class="section-desc">
+      📍 情境：想象一个完全放松、没有压力的时刻——周末清晨、与挚友相处、沉浸爱好。你无需达成任何目标，只需舒服做自己。
+    </div>
+    <div class="question-block" id="partA"></div>
+
+    <!-- Part B -->
+    <h2>⚡ 第二部分：理性模式（应对挑战、高压时）</h2>
+    <div class="section-desc">
+      📍 情境：想象你正面临需要收起情绪、全力应对的关键时刻——紧急截止、重要谈判、复杂难题，或必须做出冷静决策。
+    </div>
+    <div class="question-block" id="partB"></div>
+
+    <button class="btn" id="submit-btn">🔍 查看我的双元人格</button>
+    <div id="error-msg" class="error"></div>
+  </div>
+
+  <div id="result-section" style="display: none;">
+    <hr>
+    <h2 style="text-align: center;">📊 你的双元人格报告</h2>
+    <div id="result-content"></div>
+    <button class="btn" id="retest-btn" style="background: #475569;">↺ 重新测试</button>
+  </div>
+  <div class="footer-note">© 感性-理性双元人格模型 · 基于功能重心转移与八维动力学</div>
+</div>
+
+<script>
+  (function() {
+    // ---------- 题库数据 ----------
+    const questionsA = [
+      { id: 1, text: "在放松的聊天中，我的思绪会像弹球一样，从一个话题飞快地跳到另一个看似无关的话题上。" },
+      { id: 2, text: "我经常在独处放空时，脑中突然闪过一个关于某件事的“本质”或“真相”的顿悟。" },
+      { id: 3, text: "我会不自觉地留意到周遭环境的色彩、气味、温度变化，并从中感受到愉悦或新奇。" },
+      { id: 4, text: "遇到新情况时，我脑海中首先浮现的是“以前遇到这种事是怎么做的”，并以此作为参照。" },
+      { id: 5, text: "哪怕是规划一次朋友聚会，我也会自然地开始制定时间表、清单，让一切有条不紊。" },
+      { id: 6, text: "与人交流时，我会为某个感兴趣的概念停下来，反复思考它的定义和逻辑是否自洽。" },
+      { id: 7, text: "在一个群体中，我很容易察觉到谁被冷落了，并主动去照顾那个人的感受。" },
+      { id: 8, text: "即使在大家都觉得某件事很棒时，我也很难违心附和，因为内心自有一套“对错好坏”的标准。" },
+      { id: 9, text: "我不喜欢按部就班地思考，反而享受从各种角度不停地抛出想法和可能性的过程。" },
+      { id: 10, text: "我常常对一个模糊的未来趋势有强烈的直觉，虽然当下说不出具体理据，但事后证明是对的。" },
+      { id: 11, text: "我喜欢直接用手或身体去感受事物，比如摸摸材质、试试口感，这比看说明书要真实得多。" },
+      { id: 12, text: "熟悉的日常惯例、节日传统，能带给我一种很深的踏实感和安全感。" },
+      { id: 13, text: "说服别人时，我更倾向于直接列出客观的事实、数据和可量化的结果。" },
+      { id: 14, text: "当一本书或一部电影的设定存在逻辑漏洞时，我会感到很不舒服，甚至因此出戏。" },
+      { id: 15, text: "对我来说，维持大家之间的融洽，比当面直白地指出对方的错误更重要。" },
+      { id: 16, text: "做决定时，即使一个选择有诸多好处，如果感觉“不对”，我也很难勉强自己去做。" }
+    ];
+
+    const questionsB = [
+      { id: 17, text: "我的注意力会瞬间收窄，满脑子只想着“目标是什么”以及“达成它的最短路径是什么”。" },
+      { id: 18, text: "我会迅速在记忆库中搜索：“类似的项目以前是怎么成功的？有没有现成流程可以套用？”" },
+      { id: 19, text: "我会先停下来，把问题的结构一层层拆解清楚，搞明白所有因果，才开始行动。" },
+      { id: 20, text: "我会变得异常清醒，紧盯着现场的任何风吹草动，随时准备抓住转瞬即逝的机会。" },
+      { id: 21, text: "我会变得非常果断，直接指出哪个环节在拖慢效率，并要求必须按规则行事。" },
+      { id: 22, text: "我会不厌其烦地核对文件中的每一个数据、每一个细节，力求不出一丝差错。" },
+      { id: 23, text: "我发现自己忍不住追问“为什么”，直到把所有环节的前因后果都串联成一个无矛盾的闭环。" },
+      { id: 24, text: "我倾向于立刻动手尝试，哪怕只是先做出一个粗糙的样品，再根据反馈一步步修改。" },
+      { id: 25, text: "即使在争分夺秒时，我依然会冒出一些打破常规的创新点子，用来解决当前的困境。" },
+      { id: 26, text: "在纷繁复杂的状况中，我有时会突然抽离出来，一眼看到整个事态的唯一核心症结。" },
+      { id: 27, text: "虽然要完成任务，我仍会反复审视自己的做法，确保它没有越过我内心深处的道德底线。" },
+      { id: 28, text: "我依然会留意团队的情绪变化，希望解决方案能尽量不伤及人们的情感和士气。" },
+      { id: 29, text: "我会快速地在脑中准备A计划、B计划甚至C计划，以防主流方案中途失败。" },
+      { id: 30, text: "我可能在一瞬间，就预见到今天这个决策，在半年后会引起怎样的连锁反应。" },
+      { id: 31, text: "如果严格按流程办事，结果却违背了良心，我会感到极度痛苦并想办法寻找折中点。" },
+      { id: 32, text: "即使需要做出强硬决定，我也会先花时间解释清楚，以求得大家的理解和共识。" }
+    ];
+
+    // 维度定义与题目映射
+    const dimensions = {
+      '发散联想': { partA: [1,9], partB: [25,29] },
+      '直觉洞察': { partA: [2,10], partB: [26,30] },
+      '感官体验': { partA: [3,11], partB: [20,24] },
+      '经验传统': { partA: [4,12], partB: [18,22] },
+      '效率执行': { partA: [5,13], partB: [17,21] },
+      '逻辑分析': { partA: [6,14], partB: [19,23] },
+      '人际和谐': { partA: [7,15], partB: [28,32] },
+      '内心价值': { partA: [8,16], partB: [27,31] }
+    };
+
+    // 镜像映射表 (感性F型 -> 理性T型)
+    const mirrorMap = {
+      'ENFP': 'ESTJ',
+      'INFP': 'ISTJ',
+      'INFJ': 'ISTP',
+      'ENFJ': 'ESTP',
+      'ESFP': 'ENTJ',
+      'ISFP': 'INTJ',
+      'ESFJ': 'ENTP',
+      'ISFJ': 'INTP'
+    };
+
+    // 功能态度分类
+    const extrovertedFuncs = new Set(['发散联想','感官体验','效率执行','人际和谐']);
+    const introvertedFuncs = new Set(['直觉洞察','经验传统','逻辑分析','内心价值']);
+    const perceivingFuncs = new Set(['发散联想','直觉洞察','感官体验','经验传统']);
+    const judgingFuncs = new Set(['效率执行','逻辑分析','人际和谐','内心价值']);
+
+    // ---------- 渲染题目 ----------
+    function renderQuestions(containerId, questions, prefix) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      questions.forEach(q => {
+        const div = document.createElement('div');
+        div.className = 'question-item';
+        div.innerHTML = `
+          <div class="question-text">
+            <span class="q-num">${q.id}.</span>
+            <span>${q.text}</span>
+          </div>
+          <div class="options">
+            ${[1,2,3,4,5].map(val => `
+              <label>
+                <input type="radio" name="${prefix}_${q.id}" value="${val}" required>
+                ${val}
+              </label>
+            `).join('')}
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    renderQuestions('partA', questionsA, 'a');
+    renderQuestions('partB', questionsB, 'b');
+
+    // ---------- 计算维度得分 ----------
+    function calcScores(prefix) {
+      const scores = {};
+      for (let dim in dimensions) {
+        scores[dim] = 0;
+        const ids = dimensions[dim][prefix === 'a' ? 'partA' : 'partB'];
+        ids.forEach(id => {
+          const radio = document.querySelector(`input[name="${prefix}_${id}"]:checked`);
+          if (radio) {
+            scores[dim] += parseInt(radio.value);
+          }
+        });
+      }
+      return scores;
+    }
+
+    // ---------- 根据得分判定MBTI类型 ----------
+    function determineType(scores) {
+      // 找出得分最高的维度 (若并列取第一个)
+      let maxDim = '';
+      let maxVal = -1;
+      for (let dim in scores) {
+        if (scores[dim] > maxVal) {
+          maxVal = scores[dim];
+          maxDim = dim;
+        }
+      }
+      if (maxVal === 0) return null; // 未作答
+
+      // E/I : 最高维度外倾 -> E，内倾 -> I
+      const EI = extrovertedFuncs.has(maxDim) ? 'E' : 'I';
+
+      // S/N : 感知维度中得分最高者，比较发散联想+直觉洞察 vs 感官体验+经验传统
+      const intuitiveScore = scores['发散联想'] + scores['直觉洞察'];
+      const sensingScore = scores['感官体验'] + scores['经验传统'];
+      const SN = intuitiveScore >= sensingScore ? 'N' : 'S';
+
+      // F/T : 判断维度中得分最高者，比较人际和谐+内心价值 vs 效率执行+逻辑分析
+      const feelingScore = scores['人际和谐'] + scores['内心价值'];
+      const thinkingScore = scores['效率执行'] + scores['逻辑分析'];
+      const FT = feelingScore >= thinkingScore ? 'F' : 'T';
+
+      // P/J : 最高维度是感知类 -> P，判断类 -> J
+      const PJ = perceivingFuncs.has(maxDim) ? 'P' : 'J';
+
+      return EI + SN + FT + PJ;
+    }
+
+    // ---------- 提交与结果生成 ----------
+    document.getElementById('submit-btn').addEventListener('click', () => {
+      const errorDiv = document.getElementById('error-msg');
+      errorDiv.textContent = '';
+
+      // 检查所有题目是否都已作答
+      const allRadios = document.querySelectorAll('input[type="radio"]');
+      const answered = new Set();
+      allRadios.forEach(r => { if (r.checked) answered.add(r.name); });
+      const totalQuestions = questionsA.length + questionsB.length;
+      if (answered.size < totalQuestions) {
+        errorDiv.textContent = '⚠️ 请确保所有题目都已选择后再提交。';
+        return;
+      }
+
+      // 计算A/B维度得分
+      const scoresA = calcScores('a');
+      const scoresB = calcScores('b');
+
+      // 判定类型
+      const typeA = determineType(scoresA);
+      const typeB = determineType(scoresB);
+
+      if (!typeA || !typeB) {
+        errorDiv.textContent = '计算出现异常，请刷新重试。';
+        return;
+      }
+
+      // 计算总分与重心偏向度
+      const sumA = Object.values(scoresA).reduce((a,b)=>a+b,0);
+      const sumB = Object.values(scoresB).reduce((a,b)=>a+b,0);
+      const balanceRaw = (sumA - sumB) / (sumA + sumB) * 100; // -100 到 100
+      const balancePercent = Math.round(balanceRaw);
+      
+      // 镜像验证 (若A为F型且B在镜像表中匹配，则展示标准双元；否则提示)
+      let rationalMirror = mirrorMap[typeA] || null;
+      let mirrorMatch = (typeB === rationalMirror);
+      
+      // 构建结果HTML
+      let resultHTML = '';
+      if (mirrorMatch) {
+        resultHTML += `
+          <div class="result-card">
+            <p style="font-weight:500; color:#4338ca;">🎭 你的双元人格类型</p>
+            <div class="result-type">${typeA} – ${typeB}</div>
+            <p style="margin-top:0.5rem;">感性面 · 理性镜像</p>
+          </div>
+          <p style="text-align:center; color:#334155;">✅ 你的理性高压模式与理论预测的镜像人格完全吻合，展现了清晰的功能重心转移。</p>
+        `;
+      } else {
+        resultHTML += `
+          <div class="result-card">
+            <p style="font-weight:500; color:#4338ca;">🔀 你的双元人格类型</p>
+            <div class="result-type">${typeA} – ${typeB}</div>
+            <p style="margin-top:0.5rem;">感性面 · 理性面（非标准镜像）</p>
+          </div>
+          <p style="text-align:center; color:#b45309;">⚠️ 你的理性模式 (${typeB}) 与理论预测的镜像 (${rationalMirror || '无'}) 不完全一致，这可能意味着你在高压下调动了独特的阴影功能组合，值得进一步探索。</p>
+        `;
+      }
+
+      // 重心偏向度图示
+      const fillPercent = Math.min(100, Math.max(0, ((balancePercent + 100) / 2))); // 转换到0-100
+      resultHTML += `
+        <div style="background:white; border-radius:1rem; padding:1.5rem; margin:1.5rem 0;">
+          <h3 style="text-align:center; margin-bottom:1rem;">⚖️ 双元重心偏向度</h3>
+          <div class="balance-meter">
+            <div class="balance-fill" style="width:${fillPercent}%;"></div>
+          </div>
+          <div class="axis-labels">
+            <span>⬅ 更偏理性模式</span>
+            <span>⚪ 均衡</span>
+            <span>更偏感性模式 ➔</span>
+          </div>
+          <p style="text-align:center; margin-top:1rem; font-weight:600;">
+            ${balancePercent > 0 ? `🔹 偏向感性面 ${balancePercent}%` : balancePercent < 0 ? `🔸 偏向理性面 ${Math.abs(balancePercent)}%` : '🔹🔸 感性与理性完美平衡'}
+          </p>
+          <p class="note">正值为感性倾向，负值为理性倾向。接近0表示你已能自如调用两种模式。</p>
+        </div>
+      `;
+
+      // 详细维度得分（可折叠）
+      resultHTML += `
+        <details style="margin-top:1rem; background:#f8fafc; padding:1rem; border-radius:1rem;">
+          <summary style="font-weight:600; cursor:pointer;">📋 查看维度得分详情</summary>
+          <div style="display:flex; justify-content:space-around; flex-wrap:wrap; margin-top:1rem;">
+            <div><strong>Part A 感性模式</strong><br>${Object.entries(scoresA).map(([k,v])=>`${k}: ${v}`).join('<br>')}</div>
+            <div><strong>Part B 理性模式</strong><br>${Object.entries(scoresB).map(([k,v])=>`${k}: ${v}`).join('<br>')}</div>
+          </div>
+          <p style="margin-top:0.8rem; font-size:0.9rem;">A总分: ${sumA} / B总分: ${sumB}</p>
+        </details>
+      `;
+
+      // 理论提示
+      resultHTML += `
+        <div class="intro" style="margin-top:1.5rem;">
+          💡 <strong>理论解读：</strong>你的感性面 (${typeA}) 与理性面 (${typeB}) 共享完全相同的心理功能组，仅重心位置不同。这验证了“功能重心转移”模型——你不是分裂，而是完整心灵的不同相位。
+        </div>
+      `;
+
+      document.getElementById('result-content').innerHTML = resultHTML;
+      document.getElementById('test-form').style.display = 'none';
+      document.getElementById('result-section').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // 重新测试
+    document.getElementById('retest-btn').addEventListener('click', ()=>{
+      document.getElementById('test-form').style.display = 'block';
+      document.getElementById('result-section').style.display = 'none';
+      document.getElementById('error-msg').textContent = '';
+      // 清除所有选项
+      document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+  })();
+</script>
+</body>
+</html>
